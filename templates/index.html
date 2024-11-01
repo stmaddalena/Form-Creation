@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static%}
+{% block title %} Index {% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'index_style.css' %}">
+
+<header class="header">
+    <div class="menu-bar">
+        <a href="/create" class="menu-create">New Form</a><br><br> 
+        <a href="/answers" class="menu-answers">Form Responses</a><br><br>  
+    </div>
+    <button id="scrollToTopBtn" onclick="scrollToTop()">Back To Top</button>
+    <div class="search">
+        <input type="text" id="formSearch" placeholder="Search forms">   
+    </div>
+</header>
+
+
+    <div class="box-form">
+    {% for item in form %}
+    <a href="/forms/{{ item.id }}" target="_blank" class="item">
+        <div class="name-form">
+            <p>{{ item.name | default:"" }}</p> 
+        </div>
+        <div class="description-form">
+            <p class="description-text">{{ item.description | default:"" }}</p>       
+          </div>
+        <div class="gen_date-form">
+            <p>{{ item.gen_date | default:"" }}</p>       
+        </div>
+    </a>
+    {% endfor %}
+    </div>
+
+<script>
+  document.getElementById("formSearch").addEventListener("input", function() {
+    var searchValue = this.value.toLowerCase(); // Get the lowercase search value
+
+    var items = document.getElementsByClassName("item");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var itemName = item.getElementsByClassName("name-form")[0].innerText.toLowerCase(); // Get the lowercase item name
+
+      if (itemName.includes(searchValue)) {
+        item.style.display = "flex"; // Show the item if it matches the search
+      } else {
+        item.style.display = "none"; // Hide the item if it doesn't match the search
+      }
+    }
+  });
+</script>
+  
+<script>
+window.onscroll = function() {
+    scrollFunction();
+  };
+  
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      document.getElementById("scrollToTopBtn").style.display = "block";
+    } else {
+      document.getElementById("scrollToTopBtn").style.display = "none";
+    }
+  }
+  
+  function scrollToTop() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+</script>          
+
+
+
+{% endblock %}

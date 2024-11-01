@@ -1,0 +1,16 @@
+@font-face {
+    font-family: mitr;
+    src: url(Mitr-Regular.woff);
+}
+
+* {
+    font-family: mitr;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-size: calc(60% + 0.8vmin);
+}
+
+html body {
+    margin: 0px;
+    padding: 0px;
+}

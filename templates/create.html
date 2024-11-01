@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Create Form {% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'create.css' %}">
+<div class="previous">
+    <a href="/index">
+        <img src="{% static 'previous.png' %}" width="100%">
+    </a>
+</div>
+
+{% csrf_token %}
+<form id="Form">
+    <header class="header">
+        <input type="text" id="name" name="name" value="Name" maxlength="30">
+        <textarea id="description" name="description" rows="3" maxlength="184"></textarea>
+    </header>
+    <div class="questions">
+        <div id="questionsContainer">
+            <div class="question" style="padding-top: 3rem">
+                <label for="question">Question</label><br>
+                <textarea class="question-input" name="question[]" rows="4"></textarea><br><br>
+
+                <label for="choices" style="margin-bottom: 1.3rem">Choices</label>
+                <div class="choices-container">
+                    
+                </div>
+                <input type="button" class="addChoiceButton" value="Add Choice"><br><br>
+            </div>
+        </div>
+    </div>
+
+    <div class="addQuestion">
+        <input type="button" value="Add Question" id="addQuestionButton"><br><br>
+    </div>
+
+    <div class="date">
+        <div class="date-start">
+            <label for="date_start">Date Start</label>
+            <input type="date" id="date_start" name="date_start" style="padding: 3px 10px; font-weight: 500; font-size: 0.8rem; letter-spacing: 0.7px; color: #444; text-shadow: 1px 1px 7px rgba(51, 51, 51, 0.15); border-radius: 1rem;"><br><br>
+        </div>
+        <div class="date-end">
+            <label for="date_end">Date End</label>
+            <input type="date" id="date_end" name="date_end" style="padding: 3px 10px; font-weight: 500; font-size: 0.8rem; letter-spacing: 0.7px; color: #444; text-shadow: 1px 1px 7px rgba(51, 51, 51, 0.15); border-radius: 1rem;"><br><br>
+        </div>
+    </div>
+
+    <div class="submit">
+        <input type="submit" value="Submit" style="background: #2D4059; border: #2D4059; margin-left: 1rem; font-weight: 500; font-size: 1.5rem; letter-spacing: 0.7px; color: #fff; border-radius: 1rem; height: 4rem; width: 8rem" align="center">
+    </div>
+    {% comment %} <input type="button" value="Clear" id="clearButton" style="background: #FFE569; border: #FFE569; margin-left: 1rem; font-weight: 500; font-size: 1rem; letter-spacing: 0.7px; color: #444; border-radius: 1rem; height: 2.3rem; width: 5.3rem" align="center"> {% endcomment %}
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+
+    $('#addQuestionButton').click(function() {
+        var questionHTML = `
+            <div class="question" style="margin-top: 1rem">
+                    <button type="button" class="deleteQuestionButton">
+                        <img src="{% static "close.png" %}" width="90%">
+                    </button>
+  
+                <label for="question">Question</label><br>
+
+                <textarea class="question-input" name="question[]" rows="4"></textarea><br><br>
+
+                <label for="choices" style="margin-bottom: 1.3rem" >Choices</label>
+                <div class="choices-container">
+                    
+                </div>
+                <input type="button" class="addChoiceButton" value="Add Choice"><br><br>
+            </div>
+        `;
+
+        $('#questionsContainer').append(questionHTML);
+    });
+
+    $(document).on('click', '.addChoiceButton', function() {
+        var choicesContainer = $(this).siblings('.choices-container');
+        var choiceHTML = `
+            <div class="choice">
+                <input type="text" class="choices-input" name="choices[]" value="">
+                <button type="button" class="removeChoiceButton">
+                    <img src="{% static "delete.png" %}" width="70%">
+                </button>
+            </div>
+        `;
+        choicesContainer.append(choiceHTML);
+    });
+    
+    $(document).on('click', '.removeChoiceButton', function() {
+        $(this).closest('.choice').remove();
+    });
+
+    $(document).on('click', '.deleteQuestionButton', function() {
+        $(this).closest('.question').remove();
+    });
+
+    $('#Form').submit(function(event) {
+        event.preventDefault();
+
+        var formData = {
+            'name': $('#name').val(),
+            'description': $('#description').val(),
+            'questions_and_choices': [],
+            'date_start': $('#date_start').val(),
+            'date_end': $('#date_end').val(),
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        };
+    
+        $('.question-input').each(function() {
+            var question = $(this).val();
+            var choices = [];
+        
+            $(this).siblings('.choices-container').find('.choices-input').each(function() {
+                choices.push($(this).val());
+            });
+        
+            formData['questions_and_choices'].push({
+                'question': question,
+                'choices': choices
+            });
+        });
+    
+        $.ajax({
+            url: "{% url 'create' %}",
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            headers: { 'X-CSRFToken': formData['csrfmiddlewaretoken'] }, 
+            success: function(response) {
+                console.log(response);
+                window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+
+    $('#clearButton').click(function() {
+        $('input[type="text"]').val('');
+        $('input[type="date"]').val('');
+    });
+</script>
+{% endblock %}

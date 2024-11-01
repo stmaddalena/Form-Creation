@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} {% for items in form %} {{ items.name }} {% endfor %} {% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'forms.css' %}">
+
+{% csrf_token %}
+<form id="Form">
+    <header class="header">
+        {% for items in form %}
+            <div class="name">
+                {{ items.name }}<br>
+            </div>
+            <div class="description">
+                {{ items.description }}
+            </div>
+        {% endfor %}
+    </header>
+
+    <div class="main">
+        {% for items in questions_choices %}
+        <div class="subform">
+            <div class="question-name">
+                {{ items.question }} <br>
+            </div>
+            {% for choice in items.choices %}
+                <div class="choice-name">
+                    {% if items.question_type_id == 1 %}
+                        <input type="radio" id="{{ items.id }}_choice_{{ forloop.counter }}" name="{{ items.id }}" value="{{ choice }}">
+                        <label for="{{ items.id }}_choice_{{ forloop.counter }}">{{ choice }}</label>
+                    {% else %}
+                        <input style="height: 2.5rem; width: 100%;
+                        border-radius: 0.5rem;
+                        padding: 0.5rem 1rem;
+                        border: 1px solid #dadada;
+                        margin-right: 1rem;" type="text" id="{{ items.id }}" name="{{ items.id }}">
+                    {% endif %}
+                    <br>
+                </div>
+            {% endfor %}
+            <br>
+        </div>
+        {% endfor %}
+    </div>
+    <footer class="footer">
+        <button type="button" id="clearButton">Clear Answers</button>
+        <input class="submit" type="submit" value="Submit">
+    </footer>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $('#Form').submit(function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        var formId = {{ form_id }};
+        var answers = {};
+
+        $('.subform').each(function() {
+            var questionId = $(this).find('input[type="radio"]:checked').attr('name') || $(this).find('input[type="text"]').attr('name');
+            var questionValue = $(this).find('input[type="radio"]:checked').val() || $(this).find('input[type="text"]').val();
+            answers[questionId] = questionValue;
+        });
+
+        var formData = {
+            'formID': formId,
+            'answers': answers,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        };
+
+        $.ajax({
+            url: "{% url 'forms' form_id=form_id %}",
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            headers: { 'X-CSRFToken': formData['csrfmiddlewaretoken'] },
+            success: function(response) {
+                console.log(response);
+                window.location.reload();
+            },
+            error: function(xhr, status, error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#clearButton').click(function() {
+        $('.subform input[type="radio"]').prop('checked', false); // Clear radio button selections
+        $('.subform input[type="text"]').val(''); // Clear text input values
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static%}
+{% block title %} Answers {% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.js"></script>
+
+<script src="https://cdnjs.com/libraries/Chart.js"></script>
+<script src="https://www.jsdelivr.com/package/npm/chart.js?path=dist"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.0/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+<link rel="stylesheet" href="{% static 'answers.css' %}">
+
+<header class="header">
+  <form method="post" action="{% url 'answers' %}">
+    {% csrf_token %}
+    <select class="selectpicker" id="formID" name="formID" data-live-search="true" data-live-search-style="startsWith">
+      <option style="display: none;" value="0"> Select Form </option>
+      {% for item in form %}
+        <option class="option" value="{{ item.id }}">{{ item.name }} </option>
+      {% endfor %}
+    </select>
+    <button type="submit" id="searchData" name="searchData">Submit</button>
+  </form>
+  <div class="name-form" >
+    {% for item in data %}{% if forloop.first %}{{ item.name }}{% endif %}{% endfor %}
+  </div>
+</header>
+
+
+<script>
+  function getValue() {
+    var inputField = document.getElementById("inputField");
+    var value = inputField.value;
+    
+    alert("The entered value is: " + value);
+  }
+</script>
+
+<div style="padding: 3rem; margin: 3rem 5rem 4.5rem 5rem; box-shadow: 2px 2px 7px 2px rgba(0, 0, 0, 0.08); border-radius: 7px; background: #fff; min-width: 83rem;">
+  <table id="example" class="table table-borderless table-striped" name="data" >
+    <thead class="thead-light">
+        <tr>
+          <th style="font-size: 13px; font-weight: 550; text-align:center">Type</th>
+          <th style="font-size: 13px; font-weight: 550; text-align:center">Question</th>
+          <th style="font-size: 13px; font-weight: 550; text-align:center">Answer</th>
+          <th style="font-size: 13px; font-weight: 550; text-align:center">Count</th>
+        </tr>
+    </thead>
+    <tbody>
+      {% for items in data %}
+        <tr style="font-size: 10px; text-align:center">
+          <td>{{ items.type }}</td>
+          <td>{{ items.question }}</td>
+          <td>{{ items.answer }}</td>
+          <td>{{ items.count | default:"-"}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<script>
+  $('#searchData').click(function(){
+      $.ajax({
+          url:"{% url 'answers' %}",
+          method:"POST",
+          data:{
+            'formID': $('.formID').val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+        }
+      });
+  });
+  </script>
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/file-saver/dist/FileSaver.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Get the element by ID
+      var element = document.getElementById("your_element_id");
+    
+      // Get the value of the element
+      var value = element.value;
+    
+      // Do something with the value
+      console.log("Retrieved value:", value);
+    });
+  </script>
+
+  <script>
+    $(document).ready(function(){
+        $('#example').DataTable({
+            dom: 'Bfrtip',
+            searching: true,
+            pageLength: 12,
+            buttons: [
+                {
+                    text: 'Save to Excel',
+                    className: 'custom-button',
+                    action: function(e, dt, node, config){
+                        var data = dt.data().toArray();
+
+                        var header = [];
+                        $('#example thead th').each(function(){
+                            header.push($(this).text());
+                        });
+                        data.unshift(header);
+
+                        var workbook = XLSX.utils.book_new();
+                        var worksheet = XLSX.utils.aoa_to_sheet(data);
+                        var sheetName = 'Data Sheet';
+                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+                        var excelFile = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
+                        function s2ab(s){
+                            var buf = new ArrayBuffer(s.length);
+                            var view = new Uint8Array(buf);
+                            for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
+                            return buf;
+                        }
+                        saveAs(new Blob([s2ab(excelFile)], {type: 'application/octet-stream'}), 'บะหมี่หมูแดง.xlsx');
+                    }
+                }
+            ]
+        });
+    });
+
+
+    function saveAsExcelFile(data, filename){
+        var blob = new Blob([data], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename + '.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+  </script>
+  
+{% endblock %}

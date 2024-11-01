@@ -1,0 +1,89 @@
+.header {
+    margin: 1rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    row-gap: 1rem;
+}
+
+.name {
+    height: 6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.5rem;
+    padding: 0px 2rem;
+    font-size: 40px;
+    font-weight: 600;
+    color: #333;
+}
+
+.description {
+    width: 50rem;
+    height: auto;
+    display: inline;
+    word-wrap: break-word;
+    text-align: center;
+    align-items: center;
+    font-size: large;
+    font-weight: 400;
+    color: #5d5d5d;
+}
+
+
+.main{
+    margin: 1rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.subform {
+    background-color: rgb(241, 241, 241);
+    width: 50rem;
+    padding: 2rem 2rem 0rem 2rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.question-name {
+    font-size: larger;
+    margin-bottom: 13px;
+}
+
+.choice-name {
+    font-size: small;
+    margin-bottom: 8px;
+    margin-left: 5px;
+}
+
+.submit {
+    height: 3rem;
+    width: 10rem;
+    border-radius: 0.5rem;
+    border: none;
+    background-color: #2D4059;
+    color: white;
+}
+
+.footer {
+    margin: 2rem 4rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    column-gap: 2.5rem;
+}
+
+
+#clearButton {
+    height: 3rem;
+    width: 10rem;
+    border-radius: 0.5rem;
+    border: none;
+    background-color: #EA5455;
+    color: white;
+}
